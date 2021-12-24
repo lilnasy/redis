@@ -1,0 +1,21 @@
+tasks:
+  - before: |
+      mkdir -p ~/.deno/bin && cd "$_"
+      
+      curl -fL https://github.com/denoland/deno/releases/latest/download/deno-x86_64-unknown-linux-gnu.zip | jar x
+      
+      chmod +x deno
+      
+      ./deno completions bash > ~/.bashrc.d/90-deno
+      
+      # Fix for deno extension error "Launching server using command deno failed."
+      # The error seems to be caused when PATH does not include the literal path to the bin folder:
+      # '~/.deno/bin' or '$HOME/.deno/bin' seem to be problematic for the extension.
+      # We can avoid that by resolving the pwd variable at the time of adding to .bashrc.
+      
+      echo "export PATH=\"$PWD:\$PATH\"" >> ~/.bashrc.d/90-deno
+      
+      exit
+vscode:
+  extensions:
+    - "denoland.vscode-deno"
