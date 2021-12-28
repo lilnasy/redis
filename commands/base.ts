@@ -25,7 +25,7 @@ export default class {
 
 		this.running = command
 
-		const response = await command.then((messages) => messages[0])
+		const response = await command.then(messages => messages[0])
 
 		return response
 	}
@@ -63,7 +63,7 @@ export default class {
 	}
 	*/
 
-	async SendRawRESP(respReq: RESP) {
+	private async SendRawRESP(respReq: RESP) {
 		// instead of using a queue, Send waits for the promise of the running command to settle
 		await this.running
 
