@@ -68,13 +68,13 @@ export function decodeRESP(resp: RESP, acc: Array<RedisResponse> = []): Array<Re
 		case '=':
 		case '$': {
 			
-			const _verbatimStringLength = resp.substring(1, resp.indexOf('\r\n'))
+			const verbatimStringLength = parseInt(resp.substring(1, resp.indexOf('\r\n')))
 			
 			const rest = resp.substring(resp.indexOf('\r\n') + 2)
 			
-			const verbatimString = rest.substring(0, rest.indexOf('\r\n'))
+			const verbatimString = rest.substring(0, verbatimStringLength)
 			
-			const restrest = rest.substring(rest.indexOf('\r\n') + 2)
+			const restrest = rest.substring(verbatimStringLength + 2)
 			
 			return decodeRESP(restrest, [...acc, verbatimString])
 		}
@@ -144,13 +144,13 @@ export function decodeRESP(resp: RESP, acc: Array<RedisResponse> = []): Array<Re
 		// Blob error: binary safe error code and message.
 		case '!': {
 			
-			const _blobErrorLength = resp.substring(1, resp.indexOf('\r\n'))
+			const blobErrorLength = parseInt(resp.substring(1, resp.indexOf('\r\n')))
 			
 			const rest = resp.substring(resp.indexOf('\r\n') + 2)
 			
-			const value = rest.substring(0, rest.indexOf('\r\n'))
+			const value = rest.substring(0, blobErrorLength)
 			
-			const restrest = rest.substring(rest.indexOf('\r\n') + 2)
+			const restrest = rest.substring(blobErrorLength + 2)
 			
 			return decodeRESP(restrest, [...acc, new Error(value)])
 		}
