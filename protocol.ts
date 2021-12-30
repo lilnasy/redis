@@ -155,6 +155,7 @@ export function decodeRESP(resp: RESP, acc: Array<RedisResponse> = []): Array<Re
 			return decodeRESP(restrest, [...acc, new Error(value)])
 		}
 
+		// Big number: a large number non representable by the Number type
 		case '(': {
 
 			const value = resp.substring(1, resp.indexOf('\r\n'))
@@ -173,15 +174,15 @@ export function decodeRESP(resp: RESP, acc: Array<RedisResponse> = []): Array<Re
 
 			const restDecoded = decodeRESP(rest)
 
-			const map: Array<[RedisResponse, RedisResponse]> = restDecoded
+			type ReduceResult = [RedisResponse, RedisResponse][]
+			const map = restDecoded
 				.slice( 0, mapLength * 2 )
-				// map then filter because types for reduce are broken
-				.map( (_, index, array) =>
-					<[RedisResponse, RedisResponse]>
-					[ array[index], array[index + 1] ]
+				.reduce(
+					(accumulated: ReduceResult, _, ind, sourceArray) => {
+						if (ind % 2 === 1) return accumulated
+						return <ReduceResult> [ ...accumulated, [ sourceArray.at(ind), sourceArray.at(ind+1) ] ]
+					}, []
 				)
-				// keep the ones with even indices
-				.filter( (_, index) => index % 2 === 0 )
 
 			return [
 				...acc,
